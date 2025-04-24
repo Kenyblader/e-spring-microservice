@@ -47,6 +47,10 @@ public class UserService {
         logger.info("Fetching user with ID: {}", id);
         return repository.findById(id);
     }
+    
+    public Optional<User> getUserByEmail(String email) {
+    	return repository.findByEmail(email) ;
+    }
 
     public User updateUser(Long id, User updatedUser) {
         logger.info("Updating user with ID: {}", id);

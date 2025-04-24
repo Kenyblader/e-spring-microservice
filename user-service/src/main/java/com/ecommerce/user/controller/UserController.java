@@ -3,6 +3,7 @@ import com.ecommerce.user.config.JwtUtil;
 import com.ecommerce.user.model.User;
 import com.ecommerce.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,16 +39,25 @@ public class UserController {
     
     @CrossOrigin(origins = "*")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody User loginUser) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody User loginUser) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginUser.getEmail(), loginUser.getPassword())
         );
 
         String token = jwtUtil.generateToken(authentication.getName());
+      
+        Optional<User> user=service.getUserByEmail(authentication.getName());
+        
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+ 
 
-        // On retourne une Map avec une clé "token"
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("token", token);
+        response.put("role", authentication.getAuthorities().toString());
+        response.put("user",user);
 
         return ResponseEntity.ok(response);
     }
